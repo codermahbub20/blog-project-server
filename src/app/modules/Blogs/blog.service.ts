@@ -26,7 +26,7 @@ const updateBlogFromDB = async (
 // deleteBlog from database
 
 const deleteBlogFromDB = async (blogId: string, userId: string) => {
-  const result = await Blog.findByIdAndDelete({ id: blogId, author: userId });
+  const result = await Blog.findByIdAndDelete({ _id: blogId, author: userId });
   return result;
 };
 
