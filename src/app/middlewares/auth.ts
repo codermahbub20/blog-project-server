@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import CatchAsync from '../utils/CatchAsync';
 import { User } from '../modules/User/user.model';
+import { TUserRole } from '../modules/User/user.interface';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return CatchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -13,8 +14,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     // checking if the given token is valid
     const decoded = jwt.verify(token, 'secret') as JwtPayload;
-
-    console.log({ decoded });
 
     const { role, email } = decoded;
 
