@@ -23,7 +23,7 @@ const createBlog = CatchAsync(async (req: Request, res: Response) => {
 
 const updateBlog = CatchAsync(async (req: Request, res: Response) => {
   const user = req.user as JwtPayload;
-  const blogId = req.params.id;
+  const { blogId } = req.params;
   const blogData = req.body;
 
   const updatedBlog = await BlogService.updateBlogFromDB(

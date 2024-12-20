@@ -14,7 +14,7 @@ const updateBlogFromDB = async (
   userId: string,
   updates: Partial<TBlog>,
 ) => {
-  const updatedBlog = await Blog.findOneAndUpdate(
+  const updatedBlog = await Blog.findByIdAndUpdate(
     { _id: blogId, author: userId },
     updates,
     { new: true, runValidators: true },
