@@ -7,6 +7,23 @@ const createBlogInToDB = async (payload: TBlog) => {
   return result;
 };
 
+// Update blog from database
+
+const updateBlogFromDB = async (
+  blogId: string,
+  userId: string,
+  updates: Partial<TBlog>,
+) => {
+  const updatedBlog = await Blog.findOneAndUpdate(
+    { _id: blogId, author: userId },
+    updates,
+    { new: true, runValidators: true },
+  ).populate('author', 'name email');
+
+  return updatedBlog;
+};
+
 export const BlogService = {
   createBlogInToDB,
+  updateBlogFromDB,
 };
