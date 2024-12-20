@@ -1,32 +1,42 @@
 import { NextFunction, Request, Response } from 'express';
-import CatchAsync from '../utils/CatchAsync';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import config from '../config';
+import CatchAsync from '../utils/CatchAsync';
 import { User } from '../modules/User/user.model';
-import AppError from '../Errors/AppError';
 
-const auth = () => {
+const auth = (...requiredRoles: TUserRole[]) => {
   return CatchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
-
+    // checking if the token is missing
     if (!token) {
-      throw new AppError(401, 'You are not authorized user');
+      throw new Error('You are not authorized!');
     }
 
-    // check if the token are valid
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret as string,
-    ) as JwtPayload;
+    // checking if the given token is valid
+    const decoded = jwt.verify(token, 'secret') as JwtPayload;
 
-    const user = await User.findById(decoded.id);
+    console.log({ decoded });
 
-    //   checking is the user already blocked
-    const isUserBlocked = user?.isBlocked;
-    if (isUserBlocked) {
-      throw new AppError(404, 'This user is already blocked');
+    const { role, email } = decoded;
+
+    // checking if the user is exist
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      throw new Error('This user is not found !');
     }
 
+    // checking if the user is inactive
+    const userStatus = user?.isBlocked;
+
+    if (userStatus === true) {
+      throw new Error('This user is blocked ! !');
+    }
+
+    if (requiredRoles && !requiredRoles.includes(role)) {
+      throw new Error('You are not authorized');
+    }
+
+    req.user = decoded as JwtPayload;
     next();
   });
 };

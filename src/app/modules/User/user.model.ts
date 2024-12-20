@@ -50,16 +50,6 @@ userSchema.post('save', function (doc, next) {
   next();
 });
 
-userSchema.statics.isJwtIssuedBeforePasswordChange = async function (
-  passwordChangedTimeStamp: Date,
-  jwtIssuedTimeStamp: number,
-) {
-  const passwordChangeTime =
-    new Date(passwordChangedTimeStamp).getTime() / 1000;
-
-  return passwordChangeTime > jwtIssuedTimeStamp;
-};
-
 userSchema.statics.isPasswordMatched = async function (
   plainTextPassword,
   hashedPassword,
