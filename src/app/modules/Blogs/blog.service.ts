@@ -23,7 +23,15 @@ const updateBlogFromDB = async (
   return updatedBlog;
 };
 
+// deleteBlog from database
+
+const deleteBlogFromDB = async (blogId: string, userId: string) => {
+  const result = await Blog.findByIdAndDelete({ id: blogId, author: userId });
+  return result;
+};
+
 export const BlogService = {
   createBlogInToDB,
   updateBlogFromDB,
+  deleteBlogFromDB,
 };
