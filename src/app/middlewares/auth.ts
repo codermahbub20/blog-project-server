@@ -1,49 +1,39 @@
-import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { NextFunction, Request, Response } from 'express';
+import config from '../config';
+import AppError from '../Errors/AppError';
 import CatchAsync from '../utils/CatchAsync';
 import { User } from '../modules/User/user.model';
-import { TUserRole } from '../modules/User/user.interface';
-import config from '../config';
-
-const auth = (...requiredRoles: TUserRole[]) => {
+const auth = (...requiredRoles: string[]) => {
   return CatchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    // console.log(req.headers.authorization,requiredRoles);
     const token = req.headers.authorization;
-    // checking if the token is missing
     if (!token) {
-      throw new Error('You are not authorized!');
+      throw new AppError(403, `Unauthorized User `);
     }
+    const actualToken = token.startsWith('Bearer ') ? token.slice(7) : token;
+    const decoded = jwt.verify(actualToken, config.jwt_access_secret as string);
 
-    // checking if the given token is valid
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret as string,
-    ) as JwtPayload;
-
-    const { role, email } = decoded;
-
-    // checking if the user is exist
-    const user = await User.findOne({ email });
-
+    const { role, email } = decoded as JwtPayload;
+    const user = await User.isUserExistByemail(email);
     if (!user) {
-      throw new Error('This user is not found !');
+      throw new AppError(401, `Invalid credentials`);
     }
-
-    // checking if the user is inactive
-    const userStatus = user?.isBlocked;
-
-    if (userStatus === true) {
-      throw new Error('This user is blocked ! !');
+    const BlockedUser = await User.isUserBlocked(email);
+    if (BlockedUser) {
+      throw new AppError(403, `The user is blocked `);
     }
-
-    console.log(requiredRoles && !requiredRoles.includes(role));
-
-    // if (requiredRoles && !requiredRoles.includes(role)) {
-    //   throw new Error('You are not authorized');
+    // const isUserisDeleted=user?.isDeleted
+    // if(isUserisDeleted){
+    //     throw new AppError(httpStatus.FORBIDDEN,`The user is deleted `);
     // }
-
+    console.log(requiredRoles.includes(role));
+    // if (requiredRoles && !requiredRoles.includes(role)) {
+    //   throw new AppError(403, `Unauthorized User `);
+    // }
     req.user = decoded as JwtPayload;
+
     next();
   });
 };
-
 export default auth;

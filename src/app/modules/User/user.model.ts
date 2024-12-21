@@ -62,4 +62,11 @@ userSchema.statics.isUserBlocked = async function (userEmail: string) {
   return user;
 };
 
+userSchema.statics.isUserExistByemail = async function (
+  email: string,
+): Promise<TUser | null> {
+  const user = await this.findOne({ email }).select('+password');
+  return user;
+};
+
 export const User = model<TUser, UserModel>('User', userSchema);
