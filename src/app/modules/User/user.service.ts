@@ -1,3 +1,5 @@
+import AppError from '../../Errors/AppError';
+import { Blog } from '../Blogs/blog.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 
@@ -11,7 +13,39 @@ const getAllUserFromDB = async () => {
   return users;
 };
 
+const DeleteBlogByAdminFromDB = async (id: string) => {
+  // Find the blog by ID
+  const blog = await Blog.findById(id);
+
+  if (!blog) {
+    throw new AppError(401, 'Blog not found');
+  }
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    id,
+    {
+      isDeleted: true,
+    },
+    { new: true },
+  );
+
+  return updatedBlog;
+};
+// Blocked user by admin
+const BlockedUserByAdminFromDB = async (id: string) => {
+  const updatedBlog = await User.findByIdAndUpdate(
+    id,
+    {
+      isBlocked: true,
+    },
+    { new: true },
+  );
+
+  return updatedBlog;
+};
+
 export const UserServices = {
   createUserInToDB,
   getAllUserFromDB,
+  DeleteBlogByAdminFromDB,
+  BlockedUserByAdminFromDB,
 };

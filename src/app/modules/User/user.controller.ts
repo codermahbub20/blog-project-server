@@ -23,7 +23,21 @@ const getAllUsers: RequestHandler = CatchAsync(async (req, res) => {
   });
 });
 
+const DeleteBlogByAdmin: RequestHandler = CatchAsync(async (req, res) => {
+  const { id } = req.params;
+  // Add the author's ID to the blog data
+  await UserServices.DeleteBlogByAdminFromDB(id);
+
+  sendResponse(res, {
+    statusCode: 20,
+    success: true,
+    message: 'Blog deleted successfully',
+    data: {},
+  });
+});
+
 export const UserController = {
   createUser,
   getAllUsers,
+  DeleteBlogByAdmin,
 };
