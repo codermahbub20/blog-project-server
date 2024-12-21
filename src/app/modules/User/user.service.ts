@@ -6,6 +6,12 @@ const createUserInToDB = async (payload: TUser) => {
   return result;
 };
 
+const getAllUserFromDB = async () => {
+  const users = await User.find().exec();
+  return users;
+};
+
 export const UserServices = {
   createUserInToDB,
+  getAllUserFromDB,
 };
