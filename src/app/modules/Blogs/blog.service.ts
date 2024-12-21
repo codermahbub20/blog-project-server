@@ -78,11 +78,11 @@ const deleteBlogFromDB = async (id: string, payload: TBlog) => {
   const blog = await Blog.findById(id);
 
   if (!blog) {
-    throw new AppError(403, 'Blog not found');
+    throw new AppError(401, 'Blog not found');
   }
   const author = await User.findById(payload.author);
   if (!author || blog.author?.email !== author.email) {
-    throw new AppError(403, 'Only the author can delete the blog');
+    throw new AppError(401, 'Only the author can delete the blog');
   }
 
   const updatedBlog = await Blog.findByIdAndUpdate(
