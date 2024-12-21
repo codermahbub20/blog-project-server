@@ -1,6 +1,7 @@
 import { User } from '../User/user.model';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import config from '../../config';
 
 const register = async (payload: string) => {
   const result = await User.create(payload);
@@ -36,11 +37,14 @@ const login = async (payload: { email: string; password: string }) => {
 
   //create token and sent to the  client
   const jwtPayload = {
+    id: user._id,
     email: user?.email,
     role: user?.role,
   };
 
-  const token = jwt.sign(jwtPayload, 'secret', { expiresIn: '1d' });
+  const token = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: '1d',
+  });
 
   return { token };
 };

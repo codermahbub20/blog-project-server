@@ -1,16 +1,20 @@
-import { Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import CatchAsync from '../../utils/CatchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { BlogService } from './blog.service';
 import { JwtPayload } from 'jsonwebtoken';
 
-const createBlog = CatchAsync(async (req: Request, res: Response) => {
-  const user = req.user as JwtPayload;
-  const blogInfo = req.body;
+const createBlog: RequestHandler = CatchAsync(async (req, res) => {
+  const BlogData = req.body;
+  const author = req.user as JwtPayload;
+  console.log('req.user:', req.user);
+
+  // Add the author's ID to the blog data
   const result = await BlogService.createBlogInToDB({
-    ...blogInfo,
-    author: user._id,
+    ...BlogData,
+    author: author.id,
   });
+
   sendResponse(res, {
     statusCode: 201,
     success: true,
@@ -19,38 +23,52 @@ const createBlog = CatchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// Get all blogs
+const getAllBlogs: RequestHandler = CatchAsync(async (req, res) => {
+  const result = await BlogService.getAllBlogsFromDB(req.query);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Blogs fetched successfully',
+    data: result,
+  });
+});
+
 // Update blog
 
-const updateBlog = CatchAsync(async (req: Request, res: Response) => {
-  const user = req.user as JwtPayload;
-  const { blogId } = req.params;
-  const blogData = req.body;
+const updateBlog: RequestHandler = CatchAsync(async (req, res) => {
+  const { id } = req.params;
+  const BlogData = req.body;
+  const author = req.user as JwtPayload;
 
-  const updatedBlog = await BlogService.updateBlogFromDB(
-    blogId,
-    user._id,
-    blogData,
-  );
+  // Add the author's ID to the blog data
+  const result = await BlogService.updateBlogFromDB(id, {
+    ...BlogData,
+    author: author.id,
+  });
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Blog updated successfully',
-    data: updatedBlog,
+    message: 'Blog Updated successfully',
+    data: result,
   });
 });
 
 // delete blog
-const deleteBlog = CatchAsync(async (req: Request, res: Response) => {
-  const user = req.user as JwtPayload;
-  const { blogId } = req.params;
+const deleteBlog: RequestHandler = CatchAsync(async (req, res) => {
+  const { id } = req.params;
+  const BlogData = req.body;
+  const author = req.user as JwtPayload;
 
-  const result = await BlogService.deleteBlogFromDB(blogId, user._id);
+  // Add the author's ID to the blog data
+  await BlogService.deleteBlogFromDB(id, { ...BlogData, author: author.id });
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Blog deleted successfully',
-    data: result,
+    data: {},
   });
 });
 
@@ -58,4 +76,5 @@ export const BlogController = {
   createBlog,
   updateBlog,
   deleteBlog,
+  getAllBlogs,
 };

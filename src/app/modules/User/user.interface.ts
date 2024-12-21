@@ -15,6 +15,7 @@ export interface UserModel extends Model<TUser> {
     plainTextPassword: string,
     hashedPassword: string,
   ): Promise<boolean>;
+  isUserBlocked(userEmail: string): Promise<TUser | null>;
 }
 
 export type TUserRole = keyof typeof USER_ROLE;
