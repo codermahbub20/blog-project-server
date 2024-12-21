@@ -25,7 +25,9 @@ const createBlog: RequestHandler = CatchAsync(async (req, res) => {
 
 // Get all blogs
 const getAllBlogs: RequestHandler = CatchAsync(async (req, res) => {
+  // Add the author's ID to the blog data
   const result = await BlogService.getAllBlogsFromDB(req.query);
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
